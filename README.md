@@ -73,6 +73,7 @@ MongoDB stores data in flexible, JSON-like documents. Fields in a database can v
                               sudo systemctl status mongodb
                               
 If everthing works perfectly then we should the the something similar to the below 
+
     <img width="581" alt="Screenshot 2022-04-28 at 12 45 19" src="https://user-images.githubusercontent.com/80678596/165736028-8df1a03e-5fc6-4c65-be24-11c80d0b2ab0.png">
 
 - Next we are going to install Node Module package to use. WE can use either yarm or npm module. But for this project we will focus on using Npm module. We will install npm module using the commsnd bellow
@@ -107,3 +108,85 @@ If everthing works perfectly then we should the the something similar to the bel
                                 app.listen(app.get('port'), function() {
                                     console.log('Server up: http://localhost:' + app.get('port'));
                                 });
+
+## Install Express and set up Route to the Server
+
+Express is a minimal and flexible Node.js web application framework that provides features for web and mobile applications. We will use Express in to pass book information to and from our MongoDB database.
+
+We also will use Mongoose package which provides a straight-forward, schema-based solution to model your application data. We will use Mongoose to establish a schema for the database to store data of our book register
+
+- We will install Mongoose using the following command
+
+                              sudo npm install express mongoose
+                              
+- In the Books folder we will create a folder called apps and navigate in to the folder
+
+                                mkdir apps && cd apps
+                                
+- Create a file named routes.js in the apps folder and open the file
+
+                                touch routes.js && vi routes.js
+                                
+- Copy and paste the following command into the file
+
+                                var Book = require('./models/book');
+                                module.exports = function(app) {
+                                  app.get('/book', function(req, res) {
+                                    Book.find({}, function(err, result) {
+                                      if ( err ) throw err;
+                                      res.json(result);
+                                    });
+                                  }); 
+                                  app.post('/book', function(req, res) {
+                                    var book = new Book( {
+                                      name:req.body.name,
+                                      isbn:req.body.isbn,
+                                      author:req.body.author,
+                                      pages:req.body.pages
+                                    });
+                                    book.save(function(err, result) {
+                                      if ( err ) throw err;
+                                      res.json( {
+                                        message:"Successfully added book",
+                                        book:result
+                                      });
+                                    });
+                                  });
+                                  app.delete("/book/:isbn", function(req, res) {
+                                    Book.findOneAndRemove(req.query, function(err, result) {
+                                      if ( err ) throw err;
+                                      res.json( {
+                                        message: "Successfully deleted the book",
+                                        book: result
+                                      });
+                                    });
+                                  });
+                                  var path = require('path');
+                                  app.get('*', function(req, res) {
+                                    res.sendfile(path.join(__dirname + '/public', 'index.html'));
+                                  });
+                                };
+
+- In the ‘apps’ folder, we will create a folder named models and navigate in the the folder we just created 
+
+                                mkdir models && cd models
+                                
+- Next , we create a file named book.js and open the file 
+
+                                touch book.js && vi book.js
+                                
+- Copy and paste the following command into the book.js file
+
+                            var mongoose = require('mongoose');
+                            var dbHost = 'mongodb://localhost:27017/test';
+                            mongoose.connect(dbHost);
+                            mongoose.connection;
+                            mongoose.set('debug', true);
+                            var bookSchema = mongoose.Schema( {
+                              name: String,
+                              isbn: {type: String, index: true},
+                              author: String,
+                              pages: Number
+                            });
+                            var Book = mongoose.model('Book', bookSchema);
+                            module.exports = mongoose.model('Book', bookSchema);
