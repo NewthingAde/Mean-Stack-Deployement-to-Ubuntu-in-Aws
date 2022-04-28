@@ -190,3 +190,146 @@ We also will use Mongoose package which provides a straight-forward, schema-base
                             });
                             var Book = mongoose.model('Book', bookSchema);
                             module.exports = mongoose.model('Book', bookSchema);
+
+### We acccess the routes with Angular Js
+
+AngularJS provides a web framework for creating dynamic views in your web applications. In this tutorial, we use AngularJS to connect our web page with Express and perform actions on our book register.
+
+- Now we will navigate back to our 'Books' folder
+
+                              cd /home/ubuntu/Books/
+                              
+- We will create a folder named public and navigate inside it
+
+                              mkdir public && cd public
+                              
+- Inside the public folder we will create a file script.js and open the file.
+
+                              touch script.js && vi script.js
+                              
+- Copy and paste the command into the file 
+
+                            var app = angular.module('myApp', []);
+                            app.controller('myCtrl', function($scope, $http) {
+                              $http( {
+                                method: 'GET',
+                                url: '/book'
+                              }).then(function successCallback(response) {
+                                $scope.books = response.data;
+                              }, function errorCallback(response) {
+                                console.log('Error: ' + response);
+                              });
+                              $scope.del_book = function(book) {
+                                $http( {
+                                  method: 'DELETE',
+                                  url: '/book/:isbn',
+                                  params: {'isbn': book.isbn}
+                                }).then(function successCallback(response) {
+                                  console.log(response);
+                                }, function errorCallback(response) {
+                                  console.log('Error: ' + response);
+                                });
+                              };
+                              $scope.add_book = function() {
+                                var body = '{ "name": "' + $scope.Name + 
+                                '", "isbn": "' + $scope.Isbn +
+                                '", "author": "' + $scope.Author + 
+                                '", "pages": "' + $scope.Pages + '" }';
+                                $http({
+                                  method: 'POST',
+                                  url: '/book',
+                                  data: body
+                                }).then(function successCallback(response) {
+                                  console.log(response);
+                                }, function errorCallback(response) {
+                                  console.log('Error: ' + response);
+                                });
+                              };
+                            });
+                            
+- In public folder, we will create a file named index.html
+
+                            touch index.html && vi index.html
+                            
+                            
+                            
+                            
+                            
+                            
+                    <!doctype html>
+                    <html ng-app="myApp" ng-controller="myCtrl">
+                      <head>
+                        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+                        <script src="script.js"></script>
+                      </head>
+                      <body>
+                        <div>
+                          <table>
+                            <tr>
+                              <td>Name:</td>
+                              <td><input type="text" ng-model="Name"></td>
+                            </tr>
+                            <tr>
+                              <td>Isbn:</td>
+                              <td><input type="text" ng-model="Isbn"></td>
+                            </tr>
+                            <tr>
+                              <td>Author:</td>
+                              <td><input type="text" ng-model="Author"></td>
+                            </tr>
+                            <tr>
+                              <td>Pages:</td>
+                              <td><input type="number" ng-model="Pages"></td>
+                            </tr>
+                          </table>
+                          <button ng-click="add_book()">Add</button>
+                        </div>
+                        <hr>
+                        <div>
+                          <table>
+                            <tr>
+                              <th>Name</th>
+                              <th>Isbn</th>
+                              <th>Author</th>
+                              <th>Pages</th>
+
+                            </tr>
+                            <tr ng-repeat="book in books">
+                              <td>{{book.name}}</td>
+                              <td>{{book.isbn}}</td>
+                              <td>{{book.author}}</td>
+                              <td>{{book.pages}}</td>
+
+                              <td><input type="button" value="Delete" data-ng-click="del_book(book)"></td>
+                            </tr>
+                          </table>
+                        </div>
+                      </body>
+                    </html>
+
+- Next, we will change the directory back up to Books
+
+                                       cd /home/ubuntu/Books/
+                                       
+- Next, we start the server using the command
+
+                                    node server.js
+                                    
+- If everthing is done well we should get something similar to this 
+
+<img width="497" alt="Screenshot 2022-04-28 at 13 55 58" src="https://user-images.githubusercontent.com/80678596/165746878-4695f1d4-d419-4a9b-ba76-49728b281aa6.png">
+
+- The server is now up and running, we can connect it via port 3300. YTo be able to do this we can open a new terminal and ssh into our ubuntu instance to test what curl command returns locally. 
+
+                             curl -s http://localhost:3300
+
+- We should get something similar to the beloow
+
+<img width="732" alt="Screenshot 2022-04-28 at 14 00 38" src="https://user-images.githubusercontent.com/80678596/165747500-4ad363e2-e465-4ee3-b288-07544b69b5ce.png">
+
+- We will need to open TCP port 3300 in your AWS Web Console for your EC2 Instance.
+
+- You can paste the aws ip address on your webpage using poet 3300. You would get something similar to the below
+
+<img width="591" alt="Screenshot 2022-04-28 at 14 06 27" src="https://user-images.githubusercontent.com/80678596/165748514-e1353328-d108-491e-8516-b8048a94ab95.png">
+
